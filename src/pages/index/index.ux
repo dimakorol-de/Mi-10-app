@@ -1,0 +1,225 @@
+<template>
+  <div class="container">
+    <div class="menu-view" if="{{viewMode === 'menu'}}">
+      <text class="title">ВЫБОР ГЕРОЯ</text>
+      <div class="carousel">
+        <text class="char-name" style="color: {{activeChar.color}}">{{activeChar.name}}</text>
+        <text class="char-bio">{{activeChar.bio}}</text>
+        <text class="char-skill">Навык: {{activeChar.skill}}</text>
+      </div>
+      <div class="nav-buttons">
+        <input type="button" class="btn-nav" value="◀" onclick="prevChar"/>
+        <input type="button" class="btn-select" value="ИГРАТЬ" onclick="startGame"/>
+        <input type="button" class="btn-nav" value="▶" onclick="nextChar"/>
+      </div>
+      <input type="button" class="btn-achievements" value="ТРОФЕИ" onclick="showAchievements"/>
+    </div>
+
+    <div class="game-view" if="{{viewMode === 'game'}}">
+      <text class="stage-title" style="color: {{activeChar.color}}">{{stageTitle}}</text>
+      <text class="game-text">{{gameText}}</text>
+      
+      <div class="stats-row">
+        <text class="stat-lbl-conf">Уверенность: {{confidencePoints}}/100</text>
+        <text class="stat-lbl-anx">Тревожность: {{anxietyPoints}}/100</text>
+      </div>
+
+      <div class="timer-box" if="{{isLocked}}">
+        <text class="timer-text">Анализ... {{timerSeconds}} сек</text>
+      </div>
+
+      <div class="choices-box" if="{{!isLocked}}">
+        <input type="button" class="btn-choice" value="{{choice1Text}}" onclick="makeChoice(1)"/>
+        <input type="button" class="btn-choice" value="{{choice2Text}}" onclick="makeChoice(2)"/>
+        <input type="button" class="btn-choice-alt" value="Сарказм" onclick="makeSarcasm" if="{{hasSarcasm}}"/>
+      </div>
+    </div>
+
+    <div class="ending-view" if="{{viewMode === 'ending'}}">
+      <text class="ending-title">ФИНАЛ {{endingId}}</text>
+      <text class="ending-text">{{endingText}}</text>
+      <input type="button" class="btn-select" value="В МЕНЮ" onclick="backToMenu"/>
+    </div>
+
+    <div class="achievements-view" if="{{viewMode === 'achievements'}}">
+      <text class="title">ДОСТИЖЕНИЯ</text>
+      <text class="ach-item" if="{{ach1}}">ТИР ПЛАТИНА: Аналитика Солдатова</text>
+      <text class="ach-item" if="{{ach2}}">ТИР ПЛАТИНА: Тотальный Солдаут</text>
+      <text class="ach-item" if="{{ach3}}">ТИР ЗОЛОТО: Гранд-Мастер</text>
+      <text class="ach-item" if="{{!ach1 && !ach2 && !ach3}}">Наград нет. Раскройте дела.</text>
+      <input type="button" class="btn-select" value="НАЗАД" onclick="backToMenu"/>
+    </div>
+  </div>
+</template>
+
+<style>
+  .container { width: 212px; height: 520px; background-color: #000000; flex-direction: column; align-items: center; justify-content: center; padding: 10px; font-family: monospace; }
+  .menu-view, .game-view, .ending-view, .achievements-view { width: 190px; flex-direction: column; align-items: center; font-family: monospace; }
+  .title, .stage-title, .ending-title { font-size: 20px; color: #ffffff; font-weight: bold; text-align: center; margin-bottom: 10px; font-family: monospace; letter-spacing: 1px; }
+  .carousel { flex-direction: column; align-items: center; margin-bottom: 15px; height: 180px; justify-content: center; }
+  .char-name { font-size: 22px; font-weight: bold; margin-bottom: 5px; font-family: monospace; }
+  .char-bio { font-size: 14px; color: #cccccc; text-align: center; font-family: monospace; }
+  .char-skill { font-size: 13px; color: #00ff88; margin-top: 5px; font-family: monospace; }
+  .nav-buttons { flex-direction: row; align-items: center; justify-content: space-between; width: 180px; }
+  .btn-nav { width: 40px; height: 35px; background-color: #222222; color: #ffffff; border-radius: 5px; border: none; font-family: monospace; }
+  .btn-select, .btn-achievements { width: 90px; height: 35px; background-color: #00ff88; color: #000000; font-weight: bold; border-radius: 5px; border: none; font-family: monospace; }
+  .btn-achievements { width: 140px; background-color: #333333; color: #ffffff; margin-top: 15px; }
+  .game-text, .ending-text { font-size: 14px; color: #e0e0e0; text-align: center; margin-bottom: 10px; height: 180px; font-family: monospace; }
+  .stats-row { flex-direction: column; align-items: flex-start; width: 180px; margin-bottom: 10px; }
+  .stat-lbl-conf { font-size: 12px; color: #00ff88; font-weight: bold; font-family: monospace; }
+  .stat-lbl-anx { font-size: 12px; color: #ff5555; font-weight: bold; margin-top: 2px; font-family: monospace; }
+  .choices-box, .timer-box { flex-direction: column; width: 180px; align-items: center; }
+  .timer-text { font-size: 14px; color: #ff9900; font-family: monospace; }
+  .btn-choice { width: 180px; height: 35px; background-color: #111111; color: #ffffff; border: 1px solid #333333; margin-bottom: 5px; border-radius: 5px; font-size: 12px; font-family: monospace; }
+  .btn-choice-alt { width: 180px; height: 35px; background-color: #331111; color: #ff5555; border: 1px solid #552222; border-radius: 5px; font-size: 12px; font-family: monospace; }
+  .ach-item { font-size: 14px; color: #ffcc00; margin-bottom: 10px; font-family: monospace; }
+</style>
+
+<script>
+  import router from '@system.router';
+  import storage from '@system.storage';
+  import vibrator from '@system.vibrator';
+  import { DailyPlots } from './story_data.js';
+
+  const characters = [
+    { id: "cheshiya", name: "Чешия", bio: "ИИ-промпт: 8-bit pixel art silhouette of Chishiya, silver neon contour, black background", skill: "Просчет рисков", color: "#ffffff" },
+    { id: "rick_c137", name: "Рик C-137", bio: "ИИ-промпт: 8-bit pixel art silhouette of Rick Sanchez, bright green neon contour", skill: "Техно-дедукция", color: "#00ff88" },
+    { id: "patrick_jane", name: "Патрик Джейн", bio: "Гениальный менталист. Видит скрытые мотивы.", skill: "Чтение мыслей", color: "#ffcc00" },
+    { id: "sol_goodman", name: "Сол Гудман", bio: "Адвокат из Альбукерке. Находит лазейки.", skill: "Красноречие", color: "#ff9900" },
+    { id: "rick_prime", name: "Рик Прайм", bio: "ИИ-промпт: Режим Убийцы. Заметайте улики в особняке.", skill: "Абсолютная скрытность", color: "#00ccff" },
+    { id: "morty", name: "Морти", bio: "Внук Рика, паникующий подросток.", skill: "Случайная удача", color: "#ffff00" }
+  ];
+
+  export default {
+    private: {
+      viewMode: "menu", charIndex: 0, activeChar: {},
+      stage: 1, stageTitle: "Акт 1: Начало", gameText: "", choice1Text: "", choice2Text: "",
+      hasSarcasm: true, confidencePoints: 20, anxietyPoints: 20, isLocked: false, timerSeconds: 30,
+      endingId: 1, endingText: "", cheshiyaStreak: 0, completedChars: [], ach1: false, ach2: false, ach3: false
+    },
+
+    onCreate() {
+      this.activeChar = characters[this.charIndex];
+      this.loadSavedProgress();
+    },
+
+    vibrateShort() {
+      try { vibrator.vibrate({ mode: 'short' }); } catch(e) {}
+    },
+
+    nextChar() { this.vibrateShort(); this.charIndex = (this.charIndex + 1) % characters.length; this.activeChar = characters[this.charIndex]; },
+    prevChar() { this.vibrateShort(); this.charIndex = (this.charIndex - 1 + characters.length) % characters.length; this.activeChar = characters[this.charIndex]; },
+
+    startGame() {
+      this.vibrateShort(); this.viewMode = "game"; this.stage = 1; this.confidencePoints = 20; this.anxietyPoints = 20; this.isLocked = false; this.generateStage();
+    },
+
+    generateStage() {
+      const plot = DailyPlots.getStory(this.activeChar.id, this.stage);
+
+      if (this.stage === 1) {
+        this.stageTitle = this.activeChar.id === "rick_prime" ? "Акт 1: Преступление" : "Акт 1: Особняк";
+        this.gameText = plot.text;
+        this.choice1Text = plot.c1;
+        this.choice2Text = plot.c2;
+      } else if (this.stage === 2) {
+        this.stageTitle = this.activeChar.id === "rick_prime" ? "Акт 2: Алиби" : "Акт 2: Давление";
+        this.gameText = plot;
+        this.anxietyPoints += this.activeChar.id === "rick_prime" ? 25 : 15;
+        this.choice1Text = this.activeChar.id === "rick_prime" ? "Идеальное Алиби" : "Вынести вердикт";
+        this.choice2Text = "Глубокий анализ (30 с)";
+        if (this.anxietyPoints >= 100) { this.triggerAnxietyDefeat(); }
+      }
+    },
+
+    makeChoice(num) {
+      this.vibrateShort();
+      if (this.stage === 1) { 
+        this.stage = 2; 
+        this.confidencePoints += 15;
+        this.generateStage(); 
+      } 
+      else if (this.stage === 2) { 
+        if (num === 2) { this.startAnalysisTimer(); } 
+        else { this.triggerEnding(); } 
+      }
+    },
+
+    makeSarcasm() {
+      this.vibrateShort(); 
+      this.confidencePoints += 30;
+      this.anxietyPoints = Math.max(0, this.anxietyPoints - 20);
+      this.gameText = DailyPlots.getSarcasm(this.activeChar.id);
+      this.hasSarcasm = false;
+      
+      if ((this.activeChar.id === "rick_c137" || this.activeChar.id === "rick_prime") && this.confidencePoints >= 100) { 
+        this.triggerToxicityEnding(); 
+      }
+    },
+
+    startAnalysisTimer() {
+      this.isLocked = true; this.timerSeconds = 30;
+      let interval = setInterval(() => {
+        this.timerSeconds--;
+        if (this.timerSeconds <= 0) { 
+          clearInterval(interval); 
+          this.isLocked = false; 
+          this.confidencePoints += 20;
+          this.triggerEnding(); 
+        }
+      }, 1000);
+    },
+
+    triggerEnding() {
+      this.viewMode = "ending";
+      
+      if (this.activeChar.id === "cheshiya") {
+        if (this.confidencePoints >= 55 && this.anxietyPoints <= 25) { this.cheshiyaStreak++; } else { this.cheshiyaStreak = 0; }
+      }
+
+      const finalResult = DailyPlots.getEnding(this.activeChar.id, this.confidencePoints, this.anxietyPoints, this.cheshiyaStreak);
+      
+      this.endingId = finalResult.id;
+      this.endingText = finalResult.text;
+
+      if (this.endingId === 21) { this.ach1 = true; }
+      if (this.endingId === 22) { this.ach2 = true; }
+if (this.endingId === 1 || this.endingId === 2 || this.endingId === 3 || this.endingId === 4 || this.endingId === 5 || this.endingId === 6 || this.endingId === 21) {
+if (this.completedChars.indexOf(this.activeChar.id) === -1) {
+this.completedChars.push(this.activeChar.id);
+}
+}
+if (this.completedChars.length === 6) { this.ach3 = true; }
+this.saveProgress();
+},
+triggerToxicityEnding() {
+this.viewMode = "ending"; this.ach2 = true; this.endingId = 22;
+this.endingText = "ПАСХАЛКА АЛЕКСАНДРА СОЛДАТОВА: Тотальный Солдаут! Наглость Рика достигла 100 процентов. Орбитальный лазер аннигилировал весь особняк Тромби.";
+this.saveProgress();
+},
+triggerAnxietyDefeat() {
+this.viewMode = "ending"; this.endingId = 8;
+this.endingText = "ПОРАЖЕНИЕ: Тревожность достигла 100 процентов. Персонаж потерял контроль, выдав себя или занеся следствие в логический тупик.";
+this.cheshiyaStreak = 0;
+this.saveProgress();
+},
+showAchievements() { this.vibrateShort(); this.viewMode = "achievements"; },
+backToMenu() { this.vibrateShort(); this.viewMode = "menu"; this.hasSarcasm = true; },
+saveProgress() {
+const data = { cheshiyaStreak: this.cheshiyaStreak, completedChars: this.completedChars, ach1: this.ach1, ach2: this.ach2, ach3: this.ach3 };
+storage.set({ key: 'game_save', value: JSON.stringify(data) });
+},
+onDestroy() { this.saveProgress(); },
+loadSavedProgress() {
+storage.get({
+key: 'game_save', default: "",
+success: (data) => {
+if (data) {
+const parsed = JSON.parse(data);
+this.cheshiyaStreak = parsed.cheshiyaStreak || 0; this.completedChars = parsed.completedChars || [];
+this.ach1 = parsed.ach1 || false; this.ach2 = parsed.ach2 || false; this.ach3 = parsed.ach3 || false;
+}
+}
+});
+}
+}
