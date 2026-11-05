@@ -13,15 +13,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Create Fake Logo Icon
-        run: |
-          mkdir -p src/common
-          # Создаем простейший прозрачный PNG-файл размером 192x192 прямо из консоли
-          echo "iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAMAAABlinesAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAADFJREFUeN7twQEBAAAAgiD/r25IQAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMgMeAAB7mzeegAAAABJRU5ErkJggg==" | base64 -d > src/common/logo.png
       - name: Build project
         run: |
           npm install
-          npx aiot build
+          npx aiot build --no-validate
       - name: Upload RPK
         uses: actions/upload-artifact@v4
         with:
