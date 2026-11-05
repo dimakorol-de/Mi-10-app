@@ -24,5 +24,6 @@ jobs:
           path: |
             dist/*.rpk
             src/dist/*.rpk
+            build/dist/*.rpk
             **/*.rpk
           if-no-files-found: error
