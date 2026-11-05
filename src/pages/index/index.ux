@@ -1,75 +1,121 @@
 <template>
-  <div class="container" style="background-color: #000000;">
+  <div class="terminal-container">
     
-    <!-- ГЛАВНОЕ МЕНЮ: ЭЛИТНЫЙ НАТИВНЫЙ СВАЙПЕР ГЕРОЕВ -->
+    <!-- ВЕРХНЯЯ СТАТУС-ПАНЕЛЬ -->
+    <div class="status-bar">
+      <text class="status-title">MULTIVERSE // CORE_v1.0</text>
+      <text class="status-battery">⚡ 100%</text>
+    </div>
+
+    <!-- ГЛАВНОЕ МЕНЮ: СВАЙПЕР В СТИЛЕ КИБЕРПАНК -->
     <div class="menu-view" if="{{viewMode === 'menu'}}">
-      <text class="title">ВЫБОР ГЕРОЯ</text>
-      
-      <!-- Свайпер с авто-перекрашиванием и тактильным кликом -->
-      <swiper class="hero-swiper" index="{{charIndex}}" duration="250" loop="false" onchange="onHeroSwipe">
+      <swiper class="hero-swiper" index="{{charIndex}}" duration="220" loop="false" onchange="onHeroSwipe">
         <div class="char-card" for="{{characters}}">
-          <div class="neon-border" style="border-color: {{$item.color}};">
-            <text class="char-name" style="color: {{$item.color}}">{{$item.name}}</text>
+          <div class="neon-badge" style="background-color: {{$item.color}};">
+            <text class="char-name">{{$item.name}}</text>
           </div>
           <text class="char-bio">{{$item.bio}}</text>
-          <text class="char-skill" style="color: {{$item.color}}">Навык: {{$item.skill}}</text>
+          <div class="skill-line">
+            <text class="skill-label">SYS_SKILL:</text>
+            <text class="char-skill" style="color: {{$item.color}}">{{$item.skill}}</text>
+          </div>
           
-          <!-- Дорогая кастомная кнопка старта, стилизованная под цвет героя -->
-          <div class="premium-start-btn" style="background-color: {{$item.color}};" onclick="startGame">
-            <text class="start-btn-text">НАЧАТЬ ИГРУ</text>
+          <!-- Монолитная кнопка запуска в цвет персонажа -->
+          <div class="premium-trigger" style="background-color: {{$item.color}};" onclick="startGame">
+            <text class="trigger-text">INITIALIZE GAME</text>
           </div>
         </div>
       </swiper>
 
-      <div class="premium-action-btn" onclick="showAchievements">
-        <text class="action-btn-text">ГАЛЕРЕЯ ТРОФЕЕВ</text>
+      <!-- ПАНЕЛЬ УПРАВЛЕНИЯ ТЕРМИНАЛОМ -->
+      <div class="control-panel">
+        <div class="btn-terminal btn-half" onclick="showAchievements">
+          <text class="btn-text">TROPHIES</text>
+        </div>
+        <div class="btn-terminal btn-half btn-exit" onclick="exitApplication">
+          <text class="btn-text-exit">SYSTEM EXIT</text>
+        </div>
       </div>
     </div>
 
-    <!-- ИГРОВОЙ ПРОЦЕСС (ЭКРАН АДАПТИВНО ОКРАШИВАЕТСЯ) -->
+    <!-- ИГРОВОЙ ПРОЦЕСС: МОНОЛИТНЫЙ КОНТРАСТНЫЙ ТЕРМИНАЛ -->
     <div class="game-view" if="{{viewMode === 'game'}}" style="border-color: {{activeChar.color}};">
-      <text class="stage-title" style="color: {{activeChar.color}};">{{stageTitle}}</text>
+      <div class="stage-header" style="background-color: {{activeChar.color}};">
+        <text class="stage-title">{{stageTitle}}</text>
+      </div>
+      
       <text class="game-text">{{gameText}}</text>
       
-      <div class="stats-row">
-        <text class="stat-lbl" style="color: {{activeChar.color}};">😎 Уверенность: {{confidencePoints}}/100</text>
-        <text class="stat-lbl" style="color: #ff5555;">Anxiety Level: {{anxietyPoints}}/100</text>
+      <!-- МОНИТОР ДАННЫХ -->
+      <div class="monitor-panel">
+        <div class="monitor-row">
+          <text class="mon-lbl">CONFIDENCE:</text>
+          <text class="mon-val" style="color: {{activeChar.color}};">{{confidencePoints}}%</text>
+        </div>
+        <div class="monitor-row">
+          <text class="mon-lbl">ANXIETY_LVL:</text>
+          <text class="mon-val" style="color: #ff3333;">{{anxietyPoints}}%</text>
+        </div>
       </div>
 
       <div class="timer-box" if="{{isLocked}}">
-        <text class="timer-text" style="color: {{activeChar.color}};">⏳ Синхронизация данных... {{timerSeconds}}с</text>
+        <text class="timer-text" style="color: {{activeChar.color}};">Processing data... {{timerSeconds}}s</text>
       </div>
 
+      <!-- ИНТЕРАКТИВНЫЕ МОНОЛИТНЫЕ КНОПКИ ВЫБОРА -->
       <div class="choices-box" if="{{!isLocked}}">
-        <div class="premium-choice" style="border-color: {{activeChar.color}};" onclick="makeChoice(1)">
+        <div class="premium-choice" style="background-color: {{activeChar.color}};" onclick="makeChoice(1)">
           <text class="choice-txt">{{choice1Text}}</text>
         </div>
-        <div class="premium-choice" style="border-color: {{activeChar.color}};" onclick="makeChoice(2)">
+        <div class="premium-choice" style="background-color: {{activeChar.color}};" onclick="makeChoice(2)">
           <text class="choice-txt">{{choice2Text}}</text>
         </div>
         <div class="premium-choice-alt" onclick="makeSarcasm" if="{{hasSarcasm}}">
-          <text class="choice-txt-alt">💬 Использовать Сарказм</text>
+          <text class="choice-txt-alt">// EXECUTE SARCASM_</text>
         </div>
       </div>
     </div>
 
     <!-- ЭКРАН КОНЦОВОК -->
     <div class="ending-view" if="{{viewMode === 'ending'}}" style="border-color: {{activeChar.color}};">
-      <text class="ending-title" style="color: {{activeChar.color}};">ФИНАЛ {{endingId}}</text>
+      <text class="ending-title" style="color: {{activeChar.color}};">REPORT_LOG // {{endingId}}</text>
       <text class="ending-text">{{endingText}}</text>
-      <div class="premium-action-btn" style="background-color: {{activeChar.color}};" onclick="backToMenu">
-        <text class="action-btn-text" style="color: #000000; font-weight: bold;">В МЕНЮ</text>
+      <div class="btn-terminal-flat" style="background-color: {{activeChar.color}};" onclick="backToMenu">
+        <text class="btn-flat-text">SHUTDOWN LOG</text>
       </div>
     </div>
 
     <!-- ГАЛЕРЕЯ ДОСТИЖЕНИЙ -->
     <div class="achievements-view" if="{{viewMode === 'achievements'}}">
-      <text class="title" style="color: #ffcc00;">СТАТУС ПРОФИЛЯ</text>
-      <div class="ach-box {{ach1 ? 'unlocked' : 'locked'}}"><text class="ach-txt">💎 Аналитика Солдатова</text></div>
-      <div class="ach-box {{ach2 ? 'unlocked' : 'locked'}}"><text class="ach-txt">🔥 Тотальный Солдаут</text></div>
-      <div class="ach-box {{ach3 ? 'unlocked' : 'locked'}}"><text class="ach-txt">👑 Гранд-Мастер</text></div>
-      <div class="premium-action-btn" onclick="backToMenu">
-        <text class="action-btn-text">ВЕРНУТЬСЯ</text>
+      <text class="title">// SYSTEM_TROPHIES</text>
+      <list class="ach-list">
+        <list-item type="ach" class="ach-box {{ach_plat1 ? 'unlocked' : 'locked'}}">
+          <text class="ach-txt">{{ach_plat1 ? 'PLATINUM: SOLDATOV_ANALYSIS' : 'DATA_LOCKED'}}</text>
+        </list-item>
+        <list-item type="ach" class="ach-box {{ach_plat2 ? 'unlocked' : 'locked'}}">
+          <text class="ach-txt">{{ach_plat2 ? 'PLATINUM: TOTAL_SOLDOUT' : 'DATA_LOCKED'}}</text>
+        </list-item>
+        <list-item type="ach" class="ach-box {{ach_plat3 ? 'unlocked' : 'locked'}}">
+          <text class="ach-txt">{{ach_plat3 ? 'PLATINUM: GRANDMASTER_CORE' : 'DATA_LOCKED'}}</text>
+        </list-item>
+        <list-item type="ach" class="ach-box {{ach_gold1 ? 'unlocked' : 'locked'}}">
+          <text class="ach-txt">{{ach_gold1 ? 'GOLD: KING_OF_DIAMONDS' : 'DATA_LOCKED'}}</text>
+        </list-item>
+        <list-item type="ach" class="ach-box {{ach_silv1 ? 'unlocked' : 'locked'}}">
+          <text class="ach-txt">{{ach_silv1 ? 'SILVER: PERFECT_CRIME' : 'DATA_LOCKED'}}</text>
+        </list-item>
+        <list-item type="ach" class="ach-box {{ach_silv2 ? 'unlocked' : 'locked'}}">
+          <text class="ach-txt">{{ach_silv2 ? 'SILVER: CHILL_MASTER' : 'DATA_LOCKED'}}</text>
+        </list-item>
+        <list-item type="ach" class="ach-box {{ach_bron1 ? 'unlocked' : 'locked'}}">
+          <text class="ach-txt">{{ach_bron1 ? 'BRONZE: INITIAL_CASE_DONE' : 'DATA_LOCKED'}}</text>
+        </list-item>
+        <list-item type="ach" class="ach-box {{ach_bron2 ? 'unlocked' : 'locked'}}">
+          <text class="ach-txt">{{ach_bron2 ? 'BRONZE: LEGAL_LOOPHOLE' : 'DATA_LOCKED'}}</text>
+        </list-item>
+      </list>
+      <div class="btn-terminal-flat" style="background-color: #ffffff;" onclick="backToMenu">
+        <text class="btn-flat-text" style="color: #000000;">RETURN_</text>
       </div>
     </div>
 
@@ -77,104 +123,122 @@
 </template>
 
 <style>
-  .container { width: 212px; height: 520px; flex-direction: column; align-items: center; justify-content: center; padding: 12px; font-family: monospace; }
-  .menu-view, .game-view, .ending-view, .achievements-view { width: 200px; height: 100%; flex-direction: column; align-items: center; justify-content: center; }
-  .game-view, .ending-view { border: 2px solid #333333; border-radius: 12px; padding: 8px; height: 490px; }
-  .title, .stage-title, .ending-title { font-size: 18px; color: #ffffff; font-weight: bold; text-align: center; margin-bottom: 8px; letter-spacing: 1px; }
+  .terminal-container { width: 212px; height: 520px; background-color: #000000; flex-direction: column; align-items: center; padding: 6px; font-family: monospace; }
   
-  .hero-swiper { width: 200px; height: 380px; background-color: #000000; }
-  .char-card { flex-direction: column; align-items: center; justify-content: center; width: 200px; height: 380px; padding: 4px; }
-  .neon-border { border: 1px solid #ffffff; padding: 6px 12px; border-radius: 8px; margin-bottom: 10px; }
-  .char-name { font-size: 20px; font-weight: bold; text-align: center; }
-  .char-bio { font-size: 13px; color: #aaaaaa; text-align: center; height: 120px; margin: 4px 6px; }
-  .char-skill { font-size: 12px; font-weight: bold; margin-bottom: 15px; }
+  .status-bar { width: 200px; height: 18px; border-bottom: 1px solid #222222; flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0 4px; }
+  .status-title { font-size: 10px; color: #444444; font-family: monospace; }
+  .status-battery { font-size: 10px; color: #00ff88; font-family: monospace; }
+
+  .menu-view, .game-view, .ending-view, .achievements-view { width: 200px; flex-direction: column; align-items: center; }
+  .game-view, .ending-view { border: 1px solid #222222; border-radius: 2px; padding: 6px; height: 480px; background-color: #020202; }
   
-  .premium-start-btn { width: 160px; height: 40px; justify-content: center; align-items: center; border-radius: 20px; margin-top: 10px; }
-  .start-btn-text { color: #000000; font-size: 14px; font-weight: bold; }
-  .premium-action-btn { width: 170px; height: 38px; background-color: #1a111a; border: 1px solid #443344; justify-content: center; align-items: center; border-radius: 8px; margin-top: 10px; }
-  .action-btn-text { color: #ffffff; font-size: 13px; }
+  .title { font-size: 14px; color: #ffffff; font-weight: bold; text-align: center; margin-bottom: 8px; letter-spacing: 1px; font-family: monospace; }
+  .stage-header { width: 186px; height: 26px; justify-content: center; align-items: center; border-radius: 1px; margin-bottom: 10px; }
+  .stage-title { font-size: 12px; color: #000000; font-weight: bold; font-family: monospace; letter-spacing: 1px; }
+  .ending-title { font-size: 13px; font-weight: bold; margin-bottom: 10px; font-family: monospace; }
   
-  .game-text, .ending-text { font-size: 14px; color: #e0e0e0; text-align: center; margin-bottom: 8px; height: 180px; padding: 0 4px; }
-  .stats-row { flex-direction: column; align-items: flex-start; width: 180px; margin-bottom: 12px; }
-  .stat-lbl { font-size: 12px; font-weight: bold; margin-top: 2px; }
+  .hero-swiper { width: 200px; height: 390px; }
+  .char-card { flex-direction: column; align-items: center; justify-content: center; width: 200px; height: 390px; padding: 0 6px; }
+  .neon-badge { padding: 4px 16px; border-radius: 1px; margin-bottom: 14px; justify-content: center; align-items: center; }
+  .char-name { font-size: 18px; font-weight: bold; color: #000000; font-family: monospace; }
+  .char-bio { font-size: 12px; color: #777777; text-align: center; height: 140px; line-height: 15px; font-family: monospace; }
   
-  .choices-box, .timer-box { flex-direction: column; width: 180px; align-items: center; }
-  .timer-text { font-size: 13px; text-align: center; }
+  .skill-line { flex-direction: row; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #151515; width: 180px; padding-bottom: 6px; justify-content: center; }
+  .skill-label { font-size: 11px; color: #444444; margin-right: 4px; font-family: monospace; }
+  .char-skill { font-size: 11px; font-weight: bold; font-family: monospace; }
   
-  .premium-choice { width: 180px; height: 42px; background-color: #080808; border: 1px solid #333333; justify-content: center; align-items: center; margin-bottom: 6px; border-radius: 8px; }
-  .premium-choice-alt { width: 180px; height: 42px; background-color: #1f0a0a; border: 1px solid #4d1414; justify-content: center; align-items: center; border-radius: 8px; }
-  .choice-txt { color: #ffffff; font-size: 12px; text-align: center; padding: 0 4px; }
-  .choice-txt-alt { color: #ff5555; font-size: 12px; font-weight: bold; }
+  .premium-trigger { width: 180px; height: 40px; justify-content: center; align-items: center; border-radius: 1px; }
+  .trigger-text { font-size: 12px; font-weight: bold; color: #000000; letter-spacing: 1px; font-family: monospace; }
   
-  .ach-box { width: 180px; height: 40px; justify-content: center; align-items: center; margin-bottom: 8px; border-radius: 6px; border: 1px solid #222222; }
-  .unlocked { background-color: #051a05; border-color: #00ff88; }
-  .locked { background-color: #111111; opacity: 0.4; }
-  .ach-txt { color: #ffffff; font-size: 13px; }
-</style>
-
-<script>
-  import router from '@system.router';
-  import storage from '@system.storage';
-  import vibrator from '@system.vibrator';
-  import { DailyPlots } from './story_data.js';
-
-  const characters = [
-    { id: "cheshiya", name: "Чешия", bio: "Специалист по теории игр из Алисы в Пограничье. Оценивает риски.", skill: "Просчет вероятностей", color: "#ffffff" },
-    { id: "rick_c137", name: "Рик C-137", bio: "Безумный токсичный ученый. Ненавидит глупые детективные тайны.", skill: "Техно-дедукция", color: "#00ff88" },
-    { id: "patrick_jane", name: "Патрик Джейн", bio: "Гениальный менталист. Читает скрытые мотивы людей по мимике.", skill: "Чтение мыслей", color: "#ffcc00" },
-    { id: "sol_goodman", name: "Сол Гудман", bio: "Эпатажный адвокат из Альбукерке. Виртуоз юридических лазеек.", skill: "Красноречие", color: "#ff9900" },
-    { id: "rick_prime", name: "Рик Прайм", bio: "Главный преступник мультивселенной. Цель: скрыть улики.", skill: "Абсолютная скрытность", color: "#00ccff" },
-    { id: "morty", name: "Морти", bio: "Внук Рика, паникующий подросток. Полагается на чистую удачу.", skill: "Случайная удача", color: "#ffff00" }
-  ];
-
-  export default {
-    private: {
-      characters: characters, viewMode: "menu", charIndex: 0, activeChar: {},
-      stage: 1, stageTitle: "Акт 1: Начало", gameText: "", choice1Text: "", choice2Text: "",
-      hasSarcasm: true, confidencePoints: 20, anxietyPoints: 20, isLocked: false, timerSeconds: 30,
-      endingId: 1, endingText: "", cheshiyaStreak: 0, completedChars: [], ach1: false, ach2: false, ach3: false
-    },
-
-    onCreate() {
-      this.activeChar = characters[this.charIndex];
-      this.loadSavedProgress();
-    },
-
-    vibrateShort() {
-      try { vibrator.vibrate({ mode: 'short' }); } catch(e) {}
-    },
-
-    onHeroSwipe(e) {
-      this.charIndex = e.index;
-      this.activeChar = characters[this.charIndex];
-      this.vibrateShort(); // Механический дорогой клик при свайпе виджета [3.1]
-    },
-
-    startGame() {
-      this.vibrateShort(); this.viewMode = "game"; this.stage = 1; this.confidencePoints = 20; this.anxietyPoints = 20; this.isLocked = false; this.generateStage();
-    },
-
-    generateStage() {
-      const plot = DailyPlots.getStory(this.activeChar.id, this.stage);
-      if (this.stage === 1) {
-        this.stageTitle = this.activeChar.id === "rick_prime" ? "Акт 1: Преступление" : "Акт 1: Особняк";
-        this.gameText = plot.text; this.choice1Text = plot.c1; this.choice2Text = plot.c2;
-      } else if (this.stage === 2) {
-        this.stageTitle = this.activeChar.id === "rick_prime" ? "Акт 2: Алиби" : "Акт 2: Давление";
-        this.gameText = plot; this.anxietyPoints += this.activeChar.id === "rick_prime" ? 25 : 15;
-        this.choice1Text = this.activeChar.id === "rick_prime" ? "Идеальное Алиби" : "Вынести вердикт";
-        this.choice2Text = "Глубокий анализ (30 с)";
-        if (this.anxietyPoints >= 100) { this.triggerAnxietyDefeat(); }
-      }
-    },
-
-    makeChoice(num) {
-      this.vibrateShort();
-      if (this.stage === 1) { this.stage = 2; this.confidencePoints += 15; this.generateStage(); } 
-      else if (this.stage === 2) { if (num === 2) { this.startAnalysisTimer(); } else { this.triggerEnding(); } }
-    },makeSarcasm() {
+  .control-panel { flex-direction: row; justify-content: space-between; width: 190px; margin-top: 6px; }
+  .btn-terminal { width: 190px; height: 36px; background-color: #111111; border: 1px solid #222222; justify-content: center; align-items: center; border-radius: 1px; }
+  .btn-terminal-flat { width: 184px; height: 38px; justify-content: center; align-items: center; border-radius: 1px; margin-top: 10px; }
+  .btn-flat-text { color: #000000; font-size: 12px; font-weight: bold; font-family: monospace; letter-spacing: 1px; }
+  .btn-half { width: 92px; }
+  .btn-exit { background-color: #220505; border-color: #330a0a; }
+  .btn-text { color: #aaaaaa; font-size: 11px; letter-spacing: 1px; font-family: monospace; }
+  .btn-text-exit { color: #ff4444; font-size: 11px; font-weight: bold; font-family: monospace; }
+  
+  .game-text, .ending-text { font-size: 13px; color: #c0c0d0; text-align: center; margin-bottom: 10px; height: 190px; line-height: 16px; font-family: monospace; }
+  
+  .monitor-panel { flex-direction: column; width: 184px; background-color: #050505; padding: 4px 8px; margin-bottom: 14px; border-left: 2px solid #333333; }
+  .monitor-row { flex-direction: row; justify-content: space-between; align-items: center; width: 168px; }
+  .mon-lbl { font-size: 11px; color: #444444; font-family: monospace; }
+  .mon-val { font-size: 11px; font-weight: bold; font-family: monospace; }
+  
+  .choices-box, .timer-box { flex-direction: column; width: 184px; align-items: center; }
+  .timer-text { font-size: 11px; font-family: monospace; }
+  
+  /* МОНОЛИТНЫЕ КОНТРАСТНЫЕ КНОПКИ ВЫБОРА */
+  .premium-choice { width: 184px; height: 40px; justify-content: center; align-items: center; margin-bottom: 5px; border-radius: 1px; padding: 0 6px; }.premium-choice-alt { width: 184px; height: 40px; background-color: #ff3333; justify-content: center; align-items: center; border-radius: 1px; margin-top: 3px; }
+.choice-txt { color: #000000; font-size: 11px; font-weight: bold; font-family: monospace; text-align: center; }
+.choice-txt-alt { color: #000000; font-size: 11px; font-weight: bold; font-family: monospace; letter-spacing: 1px; }
+.ach-list { width: 190px; height: 380px; margin-bottom: 8px; }
+.ach-box { width: 190px; height: 36px; justify-content: center; align-items: center; margin-bottom: 4px; border-radius: 1px; }
+.unlocked { background-color: #00ff88; }
+.unlocked .ach-txt { color: #000000; }
+.locked { background-color: #111111; border: 1px dashed #222222; }
+.locked .ach-txt { color: #444444; }
+.ach-txt { font-size: 10px; font-family: monospace; font-weight: bold; }
+import router from '@system.router';
+import storage from '@system.storage';
+import vibrator from '@system.vibrator';
+import { DailyPlots } from './story_data.js';
+const characters = [
+{ id: "cheshiya", name: "Чешия", bio: "Бывший медик, мастер теории игр из Алисы в Пограничье. Оценивает шансы и риски.", skill: "Теория Игр", color: "#ffffff" },
+{ id: "rick_c137", name: "Рик C-137", bio: "Безумный гений, презирающий детективную рутину. Решает загадки с помощью грубой силы.", skill: "Техно-Дедукция", color: "#00ff88" },
+{ id: "patrick_jane", name: "Патрик Джейн", bio: "Независимый консультант КБР, менталист. Вычисляет ложь подозреваемых по мимике.", skill: "Ментальный Анализ", color: "#ffcc00" },
+{ id: "sol_goodman", name: "Сол Гудман", bio: "Виртуозный адвокат из Альбукерке. Мастер создания ложных улик и поиска юридических лазеек.", skill: "Красноречие", color: "#ff9900" },
+{ id: "rick_prime", name: "Рик Прайм", bio: "Опаснейший кукловод мультивселенной. Ваша цель в режиме убийцы — заметать следы.", skill: "Абсолютная Скрытность", color: "#00ccff" },
+{ id: "morty", name: "Морти", bio: "Внук Рика, паникующий подросток. Полагается исключительно на везение.", skill: "Случайная Удача", color: "#ffff00" }
+];
+export default {
+private: {
+characters: characters, viewMode: "menu", charIndex: 0, activeChar: {},
+stage: 1, stageTitle: "SYS_INIT", gameText: "", choice1Text: "", choice2Text: "",
+hasSarcasm: true, confidencePoints: 20, anxietyPoints: 20, isLocked: false, timerSeconds: 30,
+endingId: 1, endingText: "", cheshiyaStreak: 0, completedChars: [],
+ach_plat1: false, ach_plat2: false, ach_plat3: false,
+ach_gold1: false, ach_silv1: false, ach_silv2: false, ach_bron1: false, ach_bron2: false
+},
+onCreate() {
+this.activeChar = characters[this.charIndex];
+this.loadSavedProgress();
+},
+vibrateShort() {
+try { vibrator.vibrate({ mode: 'short' }); } catch(e) {}
+},
+exitApplication() {
+this.vibrateShort(); this.saveProgress(); router.back();
+},
+onHeroSwipe(e) {
+this.charIndex = e.index; this.activeChar = characters[this.charIndex]; this.vibrateShort();
+},
+startGame() {
+this.vibrateShort(); this.viewMode = "game"; this.stage = 1; this.confidencePoints = 20; this.anxietyPoints = 20; this.isLocked = false; this.generateStage();
+},
+generateStage() {
+const plot = DailyPlots.getStory(this.activeChar.id, this.stage);
+if (this.stage === 1) {
+this.stageTitle = this.activeChar.id === "rick_prime" ? "CORE // KILLER_MODE" : "CORE // DETECTIVE_MODE";
+this.gameText = plot.text; this.choice1Text = plot.c1; this.choice2Text = plot.c2;
+} else if (this.stage === 2) {
+this.stageTitle = "CORE // ANALYZING_DATA";
+this.gameText = plot; this.anxietyPoints += this.activeChar.id === "rick_prime" ? 25 : 15;
+this.choice1Text = this.activeChar.id === "rick_prime" ? "EXECUTE_BLUFF" : "VERDICT_";
+this.choice2Text = "SYS_DEEP_LOGIC (30s)";
+if (this.anxietyPoints >= 100) { this.triggerAnxietyDefeat(); }
+}
+},
+makeChoice(num) {
+this.vibrateShort();
+if (this.stage === 1) { this.stage = 2; this.confidencePoints += 15; this.generateStage(); }
+else if (this.stage === 2) { if (num === 2) { this.startAnalysisTimer(); } else { this.triggerEnding(); } }
+},
+makeSarcasm() {
 this.vibrateShort(); this.confidencePoints += 30; this.anxietyPoints = Math.max(0, this.anxietyPoints - 20);
 this.gameText = DailyPlots.getSarcasm(this.activeChar.id); this.hasSarcasm = false;
+this.ach_silv2 = true;
 if ((this.activeChar.id === "rick_c137" || this.activeChar.id === "rick_prime") && this.confidencePoints >= 100) { this.triggerToxicityEnding(); }
 },
 startAnalysisTimer() {
@@ -185,53 +249,57 @@ if (this.timerSeconds <= 0) { clearInterval(interval); this.isLocked = false; th
 }, 1000);
 },
 triggerEnding() {
-this.viewMode = "ending";
+this.viewMode = "ending"; this.ach_bron1 = true;
 if (this.activeChar.id === "cheshiya") {
 if (this.confidencePoints >= 55 && this.anxietyPoints <= 25) { this.cheshiyaStreak++; } else { this.cheshiyaStreak = 0; }
 }
 const finalResult = DailyPlots.getEnding(this.activeChar.id, this.confidencePoints, this.anxietyPoints, this.cheshiyaStreak);
 this.endingId = finalResult.id; this.endingText = finalResult.text;
-if (this.endingId === 21) { this.ach1 = true; }
-if (this.endingId === 22) { this.ach2 = true; }
-if ([1, 2, 3, 4, 5, 6, 21].indexOf(this.endingId) !== -1) {
+if (this.endingId === 1) { this.ach_gold1 = true; }
+if (this.endingId === 4) { this.ach_bron2 = true; }
+if (this.endingId === 5) { this.ach_silv1 = true; }
+if (this.endingId === 21) { this.ach_plat1 = true; }
+if (this.endingId === 22) { this.ach_plat2 = true; }
+if (this.endingId === 1 || this.endingId === 2 || this.endingId === 3 || this.endingId === 4 || this.endingId === 5 || this.endingId === 6 || this.endingId === 21) {
 if (this.completedChars.indexOf(this.activeChar.id) === -1) { this.completedChars.push(this.activeChar.id); }
 }
-if (this.completedChars.length === 6) { this.ach3 = true; }
+if (this.completedChars.length === 6) { this.ach_plat3 = true; }
 this.saveProgress();
 },
 triggerToxicityEnding() {
-this.viewMode = "ending"; this.ach2 = true; this.endingId = 22;
+this.viewMode = "ending"; this.ach_plat2 = true; this.ach_bron1 = true; this.endingId = 22;
 this.endingText = "ПАСХАЛКА АЛЕКСАНДРА СОЛДАТОВА: Тотальный Солдаут! Наглость Рика достигла 100 процентов. Орбитальный лазер дезинтегрировал особняк Тромби.";
 this.saveProgress();
 },
 triggerAnxietyDefeat() {
-this.viewMode = "ending"; this.endingId = 8;
-this.endingText = "ПОРАЖЕНИЕ: Логический тупик! Очки Тревожности достигли 100 процентов. Персонаж запаниковал и выдал себя.";
+this.viewMode = "ending"; this.endingId = 8; this.ach_bron1 = true;
+this.endingText = "REPORT_LOG // CRITICAL_ANXIETY. Очки Тревожности достигли 100 процентов. Нервный срыв. Персонаж совершил фатальную ошибку.";
 this.cheshiyaStreak = 0; this.saveProgress();
 },
 showAchievements() { this.vibrateShort(); this.viewMode = "achievements"; },
 backToMenu() { this.vibrateShort(); this.viewMode = "menu"; this.hasSarcasm = true; },
-// ИСПРАВЛЕННОЕ ЖЕЛЕЗОБЕТОННОЕ СОХРАНЕНИЕ С СЕРИАЛИЗАЦИЕЙ СТРОК
 saveProgress() {
-const data = { cheshiyaStreak: this.cheshiyaStreak, completedChars: this.completedChars, ach1: this.ach1, ach2: this.ach2, ach3: this.ach3 };
-storage.set({
-key: 'game_save',
-value: JSON.stringify(data), // В VelaOS передается строго строка, JSON-объекты вызывали сброс!
-success: () => { console.log("Прогресс успешно сохранен в память чипа."); }
-});
+const data = {
+cheshiyaStreak: this.cheshiyaStreak, completedChars: this.completedChars,
+ach_plat1: this.ach_plat1, ach_plat2: this.ach_plat2, ach_plat3: this.ach_plat3,
+ach_gold1: this.ach_gold1, ach_silv1: this.ach_silv1, ach_silv2: this.ach_silv2,
+ach_bron1: this.ach_bron1, ach_bron2: this.ach_bron2
+};
+storage.set({ key: 'game_save_v2', value: JSON.stringify(data) });
 },
 onDestroy() { this.saveProgress(); },
 loadSavedProgress() {
 storage.get({
-key: 'game_save', default: "",
+key: 'game_save_v2', default: "",
 success: (data) => {
 if (data) {
 const parsed = JSON.parse(data);
 this.cheshiyaStreak = parsed.cheshiyaStreak || 0; this.completedChars = parsed.completedChars || [];
-this.ach1 = parsed.ach1 || false; this.ach2 = parsed.ach2 || false; this.ach3 = parsed.ach3 || false;
+this.ach_plat1 = parsed.ach_plat1 || false; this.ach_plat2 = parsed.ach_plat2 || false; this.ach_plat3 = parsed.ach_plat3 || false;
+this.ach_gold1 = parsed.ach_gold1 || false; this.ach_silv1 = parsed.ach_silv1 || false; this.ach_silv2 = parsed.ach_silv2 || false;
+this.ach_bron1 = parsed.ach_bron1 || false; this.ach_bron2 = parsed.ach_bron2 || false;
 }
 }
 });
 }
 }
-
