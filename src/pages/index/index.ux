@@ -186,7 +186,7 @@ import storage from '@system.storage';
 import vibrator from '@system.vibrator';
 import { DailyPlots } from './story_data.js';
 const characters = [
-{ id: "cheshiya", name: "Чешия", bio: "Бывший медик, мастер теории игр из Алисы в Пограничье. Оценивает шансы и риски.", skill: "Теория Игр", color: "#ffffff" },
+{ id: "cheshiya", name: "Чешия", bio: "Бывший медик, master теории игр из Алисы в Пограничье. Оценивает шансы и риски.", skill: "Теория Игр", color: "#ffffff" },
 { id: "rick_c137", name: "Рик C-137", bio: "Безумный гений, презирающий детективную рутину. Решает загадки с помощью грубой силы.", skill: "Техно-Дедукция", color: "#00ff88" },
 { id: "patrick_jane", name: "Патрик Джейн", bio: "Независимый консультант КБР, менталист. Вычисляет ложь подозреваемых по мимике.", skill: "Ментальный Анализ", color: "#ffcc00" },
 { id: "sol_goodman", name: "Сол Гудман", bio: "Виртуозный адвокат из Альбукерке. Мастер создания ложных улик и поиска юридических лазеек.", skill: "Красноречие", color: "#ff9900" },
