@@ -169,7 +169,7 @@
   .choices-box, .timer-box { flex-direction: column; width: 184px; align-items: center; }
   .timer-text { font-size: 11px; font-family: monospace; }
   
-  .premium-choice { width: 184px; height: 40px; justify-content: center; align-items: center; margin-bottom: 5px; border-radius: 1px; padding: 0 6px; }
+  /* МОНОЛИТНЫЕ КОНТРАСТНЫЕ КНОПКИ ВЫБОРА */.premium-choice { width: 184px; height: 40px; justify-content: center; align-items: center; margin-bottom: 5px; border-radius: 1px; padding: 0 6px; }
 .premium-choice-alt { width: 184px; height: 40px; background-color: #ff3333; justify-content: center; align-items: center; border-radius: 1px; margin-top: 3px; }
 .choice-txt { color: #000000; font-size: 11px; font-weight: bold; font-family: monospace; text-align: center; }
 .choice-txt-alt { color: #000000; font-size: 11px; font-weight: bold; font-family: monospace; letter-spacing: 1px; }
@@ -231,7 +231,7 @@ if (this.anxietyPoints >= 100) { this.triggerAnxietyDefeat(); }
 }
 },
 makeChoice(num) {
-vibrateShort();
+this.vibrateShort(); // НАВЕДЕН ИДЕАЛЬНЫЙ ПОРЯДОК: Добавлен потерянный 'this.' для стабильного хэптика [3.1]
 if (this.stage === 1) { this.stage = 2; this.confidencePoints += 15; this.generateStage(); }
 else if (this.stage === 2) { if (num === 2) { this.startAnalysisTimer(); } else { this.triggerEnding(); } }
 },
@@ -302,5 +302,4 @@ this.ach_bron1 = parsed.ach_bron1 || false; this.ach_bron2 = parsed.ach_bron2 ||
 }
 });
 }
-} 
- 
+}
