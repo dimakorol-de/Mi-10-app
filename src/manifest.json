@@ -1,10 +1,11 @@
 {
- "package": "com.example.myapp",
- "name": "MyApp",
+ "package": "com.soldatov.detectivequest",
+ "name": "MultiverseDetective",
  "versionName": "1.0.0",
  "versionCode": 1,
  "minPlatformVersion": 1000,
- "deviceTypeList": ["watch", "band"],
+ "icon": "/common/logo.png",
+ "deviceTypeList": ["band", "watch"],
  "features": [
    { "name": "system.router" },
    { "name": "system.storage" },
